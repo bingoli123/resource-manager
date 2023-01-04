@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.rms.dao.DictionaryDataMapper">
+    <resultMap id="BaseResultMap" type="com.inspur.rms.rmspojo.PO.DictionaryData">
+        <!--@mbg.generated-->
+        <!--@Table dictionary_data-->
+        <result column="group_value" jdbcType="VARCHAR" property="groupValue"/>
+        <result column="label" jdbcType="VARCHAR" property="label"/>
+        <result column="key" jdbcType="VARCHAR" property="key"/>
+        <result column="sort" jdbcType="INTEGER" property="sort"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        group_value, `label`, `key`, sort
+    </sql>
+    <insert id="batchInsert" parameterType="map">
+        <!--@mbg.generated-->
+        insert into dictionary_data
+        (group_value, `label`, `key`, sort)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.groupValue,jdbcType=VARCHAR}, #{item.label,jdbcType=VARCHAR}, #{item.key,jdbcType=VARCHAR},
+            #{item.sort,jdbcType=INTEGER})
+        </foreach>
+    </insert>
+</mapper>

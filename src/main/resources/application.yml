@@ -1,0 +1,116 @@
+spring:
+  cloud:
+    consul:
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        ip-address: 192.168.204.96
+        instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+        deregister: true
+        prefer-ip-address: true
+        enabled: true
+        health-check-critical-timeout: 5m
+        health-check-interval: 10s
+        register: true
+      host: 192.168.204.54
+  application:
+    name: resource-manager
+  datasource:
+    password: abc-123
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.204.96:3306/icp_ivideo_connection_manager?serverTimezone=GMT%2B8&characterEncoding=utf8&useUnicode=true&useSSL=false&&allowMultiQueries=true
+    hikari:
+      connection-timeout: 30000
+      auto-commit: true
+      max-lifetime: 1800000
+      pool-name: RMSHikariCP
+      minimum-idle: 5
+      connection-test-query: SELECT 1
+      idle-timeout: 600000
+      maximum-pool-size: 10
+    username: root
+  rabbitmq:
+    connection-timeout: 15000
+    template:
+      mandatory: true
+    addresses: 192.168.204.96:5672
+    password: abcd-1234
+    publisher-returns: true
+    listener:
+      simple:
+        auto-startup: true
+        prefetch: 2
+        acknowledge-mode: manual
+        max-concurrency: 1
+        concurrency: 1
+    virtual-host: /
+    publisher-confirm-type: correlated
+    username: root
+  redis:
+    database: 1
+    password: abcd-1234
+    port: 6379
+    host: 192.168.204.96
+    timeout: 3000
+server:
+  port: 30160
+forest:
+  variables:
+    service_name: ${spring.application.name}
+    inner_api: http://192.168.204.96:8080
+    kong: http://192.168.204.96:8001
+  read-timeout: 0
+  max-connections: 1000
+  log-response-status: true
+  timeout: 1800000
+  connect-timeout: 300000
+  log-response-content: true
+  logEnabled: true
+  retry-count: 0
+  log-request: true
+  backend: okhttp3
+  bean-id: config0
+  max-route-connections: 500
+log:
+  lifecycle: 30
+  mode: file
+  level: info
+  enable: true
+  files_path: /var/log/components/resource-manager
+  rotation_count: 30
+  rotation_size: 100
+  compression: true
+  roll_file: true
+  rotation_period: daily
+management:
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+pagehelper:
+  reasonable: false
+  support-methods-arguments: true
+  helper-dialect: mysql
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath*:/mapper/**/*.xml,classpath*:/com/inspur/ivideo/rabbit/producer/mapping/**/*.xml
+job:
+  choose: elasticjob
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath*:/mapper/**/*.xml,classpath*:/com/inspur/rabbit/producer/mapping/**/*.xml
+  global-config:
+    db-config:
+      logic-not-delete-value: 0
+      logic-delete-value: 1
+      logic-delete-field: deleted
+  type-aliases-package: com.inspur.rms.rmspojo.PO

@@ -1,0 +1,24 @@
+package com.inspur.rms.rmspojo.VO;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+
+import java.io.Serializable;
+
+/**
+ * @author : lidongbin
+ * @date : 2022/1/21 1:37 PM
+ * @Copyright : 2022 www.inspur.com Inc. All rights reserved.
+ */
+@Getter
+@Setter
+@ToString
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ConfigStatusVO implements Serializable {
+
+    @JsonProperty(value = "Code")
+    private Boolean code;
+
+}

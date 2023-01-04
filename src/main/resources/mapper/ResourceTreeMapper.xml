@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.rms.dao.ResourceTreeMapper">
+    <resultMap id="BaseResultMap" type="com.inspur.rms.rmspojo.PO.ResourceTree">
+        <!--@mbg.generated-->
+        <!--@Table resource_tree-->
+        <id column="group_id" jdbcType="BIGINT" property="groupId"/>
+        <result column="tree_uid" jdbcType="VARCHAR" property="treeUid"/>
+        <result column="parent_id" jdbcType="BIGINT" property="parentId"/>
+        <result column="group_path" jdbcType="VARCHAR" property="groupPath"/>
+        <result column="group_uid" jdbcType="VARCHAR" property="groupUid"/>
+        <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
+        <result column="business_uid" jdbcType="VARCHAR" property="businessUid"/>
+        <!--        <result column="group_desc" jdbcType="VARCHAR" property="groupDesc"/>-->
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="monitor_uid" jdbcType="VARCHAR" property="monitorUid"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="created_time" jdbcType="TIMESTAMP" property="createdTime"/>
+        <result column="deleted" jdbcType="INTEGER" property="deleted"/>
+        <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime"/>
+        <result column="event_cause" jdbcType="VARCHAR" property="eventCause"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        group_id, tree_uid, parent_id, group_path, group_name, `type`, version, created_time,
+        group_uid,business_uid,description,monitor_uid,
+        deleted, updated_time,event_cause
+    </sql>
+    <select id="findByAll" resultMap="BaseResultMap">
+        <!--@mbg.generated-->
+        select
+        <include refid="Base_Column_List"/>
+        from resource_tree
+        <where>
+            and deleted=0
+            <if test="groupId != null">
+                and group_id=#{groupId,jdbcType=BIGINT}
+            </if>
+            <if test="treeUid != null">
+                and tree_uid=#{treeUid,jdbcType=VARCHAR}
+            </if>
+            <if test="parentId != null">
+                and parent_id=#{parentId,jdbcType=BIGINT}
+            </if>
+            <if test="groupPath != null and groupPath != ''">
+                and group_path=#{groupPath,jdbcType=VARCHAR}
+            </if>
+            <if test="groupName != null and groupName != ''">
+                and group_name=#{groupName,jdbcType=VARCHAR}
+            </if>
+            <if test="type != null and type != ''">
+                and `type`=#{type,jdbcType=VARCHAR}
+            </if>
+            <if test="version != null">
+                and version=#{version,jdbcType=INTEGER}
+            </if>
+            <if test="createdTime != null">
+                and created_time=#{createdTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="deleted != null">
+                and deleted=#{deleted,jdbcType=INTEGER}
+            </if>
+            <if test="updatedTime != null">
+                and updated_time=#{updatedTime,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+    </select>
+    <insert id="batchInsert" keyColumn="group_id" keyProperty="groupId" parameterType="map" useGeneratedKeys="true">
+        <!--@mbg.generated-->
+        insert into resource_tree
+        (tree_uid, parent_id, group_path, group_name, `type`, version, created_time, deleted,
+        group_uid,business_uid,description,monitor_uid,
+        updated_time,event_cause)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.treeUid,jdbcType=VARCHAR}, #{item.parentId,jdbcType=BIGINT}, #{item.groupPath,jdbcType=VARCHAR},
+            #{item.groupName,jdbcType=VARCHAR}, #{item.type,jdbcType=VARCHAR}, #{item.version,jdbcType=INTEGER},
+            #{item.createdTime,jdbcType=TIMESTAMP},
+            #{item.deleted,jdbcType=INTEGER},#{item.groupUid,jdbcType=VARCHAR},#{item.businessUid,jdbcType=VARCHAR},#{item.description,jdbcType=VARCHAR},#{item.monitorUid,jdbcType=VARCHAR},
+            #{item.updatedTime,jdbcType=TIMESTAMP},#{item.eventCause,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selecResourceTreeMonitor" resultType="com.inspur.rms.rmspojo.VO.MonitorListVO">
+        select b.monitor_name, b.monitor_uid, b.online, b.work_state, b.recording
+        from resource_tree as a
+        left join monitor as b on a.group_uid = b.monitor_uid
+        where a.parent_id = #{groupId,jdbcType=BIGINT}
+        <bind name="type"
+              value="@com.inspur.ivideo.common.constant.ResourceNodeTypeEnum@MONITOR.getResourceTreeType()"/>
+        and a.type = #{type}
+        and a.deleted = 0
+        and b.deleted = 0
+        <if test="monitorName != null and monitorName != ''">
+            and monitor_name like concat('%',#{monitorName,jdbcType=VARCHAR},'%')
+        </if>
+    </select>
+
+
+    <select id="selectResourceTreeMonitor"
+            resultType="com.inspur.rms.rmspojo.VO.ResourceTreeMonitorVO">
+        select b.group_name as parent_name,c.business_uid,c.resource_type,c.online,a.* from
+        resource_tree as a
+        left join resource_tree as b on a.parent_id=b.group_id
+        left join monitor as c on a.monitor_uid=c.monitor_uid
+        <where>
+            and a.type='2'
+            and a.deleted=0
+            and c.deleted=0
+            <if test="name != null and name != ''">
+                and a.group_name like concat('%','${name}','%')
+            </if>
+            <if test="recursion == @com.inspur.ivideo.common.constant.RecursionEnum@NOT_RECURSION.getValue()">
+                and a.parent_id = #{groupId,jdbcType=VARCHAR}
+            </if>
+            <if test="recursion == @com.inspur.ivideo.common.constant.RecursionEnum@RECURSION.getValue()">
+                and a.group_path like concat(#{groupPath,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="online != null">
+                and c.online=#{online,jdbcType=INTEGER}
+            </if>
+        </where>
+        order by a.created_time desc
+    </select>
+
+    <select id="selectResourceTreeMonitorAbility"
+            resultType="com.inspur.rms.rmspojo.VO.ResourceTreeMonitorVO">
+        select b.group_name as parent_name,c.business_uid,c.resource_type,c.online,a.*,d.ablity_work_status,d.message
+        from
+        resource_tree as a
+        left join resource_tree as b on a.parent_id=b.group_id
+        left join monitor as c on a.monitor_uid=c.monitor_uid
+        left join monitor_event_rel as d on c.monitor_uid=d.monitor_uid and d.deleted=0 and
+        event_uid=#{abilityType,jdbcType=VARCHAR}
+        <where>
+            and a.type='2'
+            and a.deleted=0
+            and c.deleted=0
+            <if test="name != null and name != ''">
+                and a.group_name like concat('%','${name}','%')
+            </if>
+            <if test="recursion == @com.inspur.ivideo.common.constant.RecursionEnum@NOT_RECURSION.getValue()">
+                and a.parent_id = #{groupId,jdbcType=VARCHAR}
+            </if>
+            <if test="recursion == @com.inspur.ivideo.common.constant.RecursionEnum@RECURSION.getValue()">
+                and a.group_path like concat(#{groupPath,jdbcType=VARCHAR},'%')
+            </if>
+            <choose>
+                <when test="ablityConfigStatus != null and ablityConfigStatus == true">
+                    and d.id is not null
+                </when>
+                <when test="ablityConfigStatus != null and ablityConfigStatus == false">
+                    and d.id is null
+                </when>
+            </choose>
+            <if test="ablityWorkStatus != null and ablityWorkStatus != ''">
+                and d.ablity_work_status = #{ablityWorkStatus,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by a.created_time desc
+    </select>
+
+    <select id="selectAllResourceTreeMonitor"
+            resultType="com.inspur.rms.rmspojo.VO.ResourceTreeMonitorVO">
+        select b.group_name as parent_name,c.business_uid,c.resource_type,c.online,a.* from
+        resource_tree as a
+        left join resource_tree as b on a.parent_id=b.group_id
+        left join monitor as c on a.monitor_uid=c.monitor_uid
+        <where>
+            and a.type='2'
+            and a.deleted=0
+            and c.deleted=0
+            and a.tree_uid=#{catelogUid,jdbcType=VARCHAR}
+        </where>
+        order by a.created_time desc
+    </select>
+
+    <select id="getResourceTreeByRoleUidAndGroupId" resultType="com.inspur.rms.rmspojo.PO.ResourceTree">
+        select rt.*,c.online
+        from (
+        select distinct substring_index(substring(b.group_path, length(concat(#{groupPath,jdbcType=VARCHAR},'/')) + 1),
+        '/', 1) as subnode
+        from role_resource_rel a
+        left join resource_tree b on a.group_uid = b.group_uid
+        where
+        a.deleted=0
+        and b.deleted=0
+        and a.role_uid = #{roleUid,jdbcType=VARCHAR}
+        and b.group_path like concat(#{groupPath,jdbcType=VARCHAR},'/','%')) as sc
+        left join resource_tree as rt on sc.subnode = rt.group_id
+        left join monitor as c on rt.monitor_uid=c.monitor_uid and c.deleted=0
+        order by rt.group_id asc
+    </select>
+
+    <select id="getResourceTreeByRoleUidAndGroupIdCount" resultType="java.lang.Integer">
+        select count(0)
+        from (
+        select distinct substring_index(substring(b.group_path, length(concat(#{groupPath,jdbcType=VARCHAR},'/')) + 1),
+        '/', 1) as subnode
+        from role_resource_rel a
+        left join resource_tree b on a.group_uid = b.group_uid
+        where
+        a.deleted=0
+        and b.deleted=0
+        and a.role_uid = #{roleUid,jdbcType=VARCHAR}
+        and b.group_path like concat(#{groupPath,jdbcType=VARCHAR},'/','%')) as sc
+        left join resource_tree as rt on sc.subnode = rt.group_id;
+    </select>
+
+    <select id="roleGroupNameSearch" resultType="com.inspur.rms.rmspojo.PO.ResourceTree">
+        select
+        a.tree_uid,a.group_id,a.group_uid,a.group_path,a.`type`,a.group_name,a.created_time,a.deleted,a.updated_time,a.version,
+        a.business_uid,a.parent_id,a.batch_no,a.monitor_uid,a.description,a.event_cause,b.online
+        from resource_tree as a
+        left join monitor as b on a.monitor_uid=b.monitor_uid and b.deleted=0
+        where (group_path regexp #{groupPathLike,jdbcType=VARCHAR} or group_id in
+        <foreach collection="groupIds" item="item" separator="," open="(" close=")">
+            #{item,jdbcType=BIGINT}
+        </foreach>
+        )
+        and
+        group_name like concat('%','${groupName}','%')
+        and a.deleted=0
+    </select>
+
+    <select id="searchResourceName" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from resource_tree where tree_uid=#{treeUid,jdbcType=VARCHAR}
+        and deleted=0
+        and group_name like concat('%','${name}','%')
+    </select>
+
+
+    <select id="getMonitorOnlineNum" resultType="com.inspur.rms.rmspojo.DTO.MonitorNumOnlineNumDTO">
+        select path as group_id, count(0) num
+        from (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(a.group_path, '/', b.help_topic_id + 1), '/', -1) AS path
+        FROM resource_tree AS a
+        left join monitor as c on a.monitor_uid = c.monitor_uid
+        JOIN mysql.help_topic AS b
+        ON b.help_topic_id <![CDATA[<]]> (LENGTH(a.group_path) - LENGTH(REPLACE(a.group_path, '/', '')) + 1)
+        WHERE a.type = '2'
+        and a.deleted = 0
+        and c.deleted=0
+        and a.tree_uid=#{treeUid,jdbcType=VARCHAR}
+        <if test="online != null">
+            and c.online='1'
+        </if>
+        ) as num
+        where path IS NOT NULL
+        and path != ''
+        group by path;
+    </select>
+
+
+    <update id="syncDeviceResourceTreeName">
+        update device as a,subresource as b ,resource_tree as c
+        set c.group_name=b.name
+        where a.uid=b.owner_resource and b.sub_resource_uid=c.business_uid
+        and b.in_managed=1
+        and a.deleted=0 and b.deleted=0 and c.deleted=0
+        and c.type='2'
+        and a.uid in
+        <foreach collection="deviceUids" item="item" separator="," open="(" close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+    <update id="syncDeviceMonitorName">
+        update device as a,subresource as b ,monitor as c
+        set c.monitor_name=b.name,
+        c.latitude=b.latitude,
+        c.longitude=b.longitude,
+        c.altitude=b.altitude
+        where a.uid = b.owner_resource
+        and b.sub_resource_uid = c.business_uid
+        and b.in_managed = 1
+        and a.deleted = 0
+        and b.deleted = 0
+        and c.deleted = 0
+        and a.uid in
+        <foreach collection="deviceUids" item="item" separator="," open="(" close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+    <update id="syncMediaResourceTreeName">
+        update media as a,subresource as b ,resource_tree as c
+        set c.group_name=b.name
+        where a.uid = b.owner_resource
+        and b.sub_resource_uid = c.business_uid
+        and b.in_managed = 1
+        and a.deleted = 0
+        and b.deleted = 0
+        and c.deleted = 0
+        and a.uid in
+        <foreach collection="mediaUids" item="item" separator="," open="(" close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+    <update id="syncMediaMonitorName">
+        update media as a,subresource as b ,monitor as c
+        set c.monitor_name=b.name,
+        c.latitude=b.latitude,
+        c.longitude=b.longitude,
+        c.altitude=b.altitude
+        where a.uid = b.owner_resource
+        and b.sub_resource_uid = c.business_uid
+        and b.in_managed = 1
+        and a.deleted = 0
+        and b.deleted = 0
+        and c.deleted = 0
+        and a.uid in
+        <foreach collection="mediaUids" item="item" separator="," open="(" close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
+    <update id="syncPlatformResourceTreeName">
+        update platform as a,platform_device as b ,resource_tree as c
+        set c.group_name=b.group_name
+        where a.uid=b.owner_resource and b.group_uid=c.business_uid
+        and b.in_manage_num=1
+        and a.deleted=0 and b.deleted=0 and c.deleted=0
+        and a.uid= #{platformUid,jdbcType=VARCHAR}
+    </update>
+
+    <update id="syncPlatformMonitorName">
+        update platform as a,platform_device as b ,monitor as c
+        set c.monitor_name=b.group_name,
+        c.latitude=b.latitude,
+        c.longitude=b.longitude,
+        c.altitude=b.altitude
+        where a.uid=b.owner_resource and b.group_uid=c.business_uid
+        and b.in_manage_num=1
+        and a.deleted=0 and b.deleted=0 and c.deleted=0
+        and a.uid=#{platformUid,jdbcType=VARCHAR}
+    </update>
+
+    <!--    强制更新 设备 媒体数据-->
+    <update id="syncResourceCatelogDeviceName">
+        update monitor as a,subresource as b,resource_tree as c
+        set a.monitor_name=b.name,
+        a.latitude=b.latitude,
+        a.longitude=b.longitude,
+        a.altitude=b.altitude,
+        a.place_code=b.place_code,
+        a.full_address=b.full_address,
+        c.group_name=b.name,
+        a.monitor_name_update=false,
+        a.latitude_update=false,
+        a.longitude_update=false,
+        a.altitude_update=false,
+        a.full_address_update=false,
+        a.place_code_update=false
+        where a.business_uid = b.sub_resource_uid
+        and c.business_uid = b.sub_resource_uid
+        and a.monitor_uid = c.monitor_uid
+        and a.deleted = 0
+        and b.deleted = 0
+        and c.deleted = 0
+        and a.resource_type in (1, 2)
+        and c.tree_uid = #{treeUid,jdbcType=VARCHAR}
+        and c.group_path like concat(#{groupPath,jdbcType=VARCHAR},'/', '%')
+    </update>
+    <!--    强制更新平台数据-->
+    <update id="syncResourceCatelogPlatformName">
+        update monitor as a,platform_device as b,resource_tree as c
+        set a.monitor_name=b.group_name,
+        a.latitude=b.latitude,
+        a.longitude=b.longitude,
+        a.altitude=b.altitude,
+        a.place_code=b.place_code,
+        a.full_address=b.full_address,
+        c.group_name=b.group_name,
+        a.monitor_name_update=false,
+        a.latitude_update=false,
+        a.longitude_update=false,
+        a.altitude_update=false,
+        a.full_address_update=false,
+        a.place_code_update=false
+        where a.business_uid = b.group_uid
+        and c.business_uid = b.group_uid
+        and a.monitor_uid = c.monitor_uid
+        and a.deleted = 0
+        and b.deleted = 0
+        and c.deleted = 0
+        and a.resource_type in (3, 4)
+        and c.tree_uid = #{treeUid,jdbcType=VARCHAR}
+        and c.group_path like concat(#{groupPath,jdbcType=VARCHAR},'/', '%')
+    </update>
+    <!--    非强制更新设备 媒体数据-->
+    <update id="syncResourceCatelogDeviceNameNotForce">
+        update monitor as a,subresource as b,resource_tree as c
+        set a.monitor_name=(case when a.monitor_name_update=true then a.monitor_name else b.name end ),
+        a.latitude=(case when a.latitude_update=true then a.latitude else b.latitude end ),
+        a.longitude=(case when a.longitude_update=true then a.longitude else b.longitude end),
+        a.altitude=(case when a.altitude_update=true then a.altitude else b.altitude end),
+        a.place_code=(case when a.place_code_update=true then a.place_code else b.place_code end),
+        a.full_address=(case when a.full_address_update=true then a.full_address else b.full_address end),
+        c.group_name=(case when a.monitor_name_update=true then a.monitor_name else b.name end )
+        where a.business_uid = b.sub_resource_uid
+        and c.business_uid = b.sub_resource_uid
+        and a.monitor_uid = c.monitor_uid
+        and a.deleted = 0
+        and b.deleted = 0
+        and c.deleted = 0
+        and a.resource_type in (1, 2)
+        and c.tree_uid = #{treeUid,jdbcType=VARCHAR}
+        and c.group_path like concat(#{groupPath,jdbcType=VARCHAR},'/', '%')
+    </update>
+    <!--    非强制更新平台数据-->
+    <update id="syncResourceCatelogPlatformNameNotForce">
+        update monitor as a,platform_device as b,resource_tree as c
+        set a.monitor_name=(case when a.monitor_name_update=true then a.monitor_name else b.group_name end ),
+        a.latitude=(case when a.latitude_update=true then a.latitude else b.latitude end ),
+        a.longitude=(case when a.longitude_update=true then a.longitude else b.longitude end),
+        a.altitude=(case when a.altitude_update=true then a.altitude else b.altitude end),
+        a.place_code=(case when a.place_code_update=true then a.place_code else b.place_code end),
+        a.full_address=(case when a.full_address_update=true then a.full_address else b.full_address end),
+        c.group_name=(case when a.monitor_name_update=true then a.monitor_name else b.group_name end )
+        where a.business_uid = b.group_uid
+        and c.business_uid = b.group_uid
+        and a.monitor_uid = c.monitor_uid
+        and a.deleted = 0
+        and b.deleted = 0
+        and c.deleted = 0
+        and a.resource_type in (3, 4)
+        and c.tree_uid = #{treeUid,jdbcType=VARCHAR}
+        and c.group_path like concat(#{groupPath,jdbcType=VARCHAR},'/', '%')
+    </update>
+
+    <select id="getResourceAuthByGroupIdAndRoleUid" resultType="long">
+        select a.group_id
+        from resource_tree as a,
+        role_resource_rel as b
+        where a.group_uid = b.group_uid
+        and a.deleted = 0
+        and b.deleted = 0
+        and a.group_id in (${groupUidStr})
+        and b.role_uid = #{roleUid,jdbcType=VARCHAR};
+    </select>
+
+    <select id="getResourceAuthByGroupIdAndRoleUid2" resultType="string">
+        select distinct parmaMontorUid from (
+        select c.monitor_uid as parmaMontorUid,c.path,c.group_path as groupPath,d.group_uid as groupUid,d.monitor_uid as
+        authMonitorUid from (
+
+        SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(a.group_path, '/', b.help_topic_id + 1), '/', -1) AS
+        path,a.monitor_uid,a.group_path
+        FROM resource_tree as a
+        JOIN mysql.help_topic AS b
+        ON b.help_topic_id <![CDATA[<]]> (LENGTH(a.group_path) - LENGTH(REPLACE(a.group_path, '/', '')) + 1)
+        where a.tree_uid=#{catelogUid,jdbcType=VARCHAR} and a.monitor_uid in (${monitorUids})
+        and a.deleted=0
+        ) as c
+        left join resource_tree as d on c.path=d.group_id
+        where d.deleted=0 and c.path is not null
+        ) as e left join role_resource_rel f on e.groupUid=f.group_uid
+        where f.deleted=0
+        and role_uid=#{roleUid,jdbcType=VARCHAR}
+    </select>
+
+
+    <select id="getMonitorOnlineAndGroupName"
+            resultType="com.inspur.rms.rmspojo.VO.MonitorOnlineGroupNameVO">
+        select b.group_name as group_name,
+        c.business_uid as monitor_uid,
+        c.resource_type,
+        c.online as online2,
+        c.event_cause as message
+        from resource_tree as a
+        left join resource_tree as b on a.parent_id = b.group_id
+        left join monitor as c on a.monitor_uid = c.monitor_uid
+        where a.deleted=0 and b.deleted=0 and c.deleted=0
+        and c.monitor_uid in
+        <foreach collection="monitorUids" item="item" separator="," open="(" close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+
+    <!--auto generated by MybatisCodeHelper on 2022-04-20-->
+    <select id="queryByParentIdIn" resultType="com.inspur.rms.rmspojo.VO.ParentIdCountVO">
+        select parent_id,count(0) as count
+        from resource_tree where parent_id in
+        <foreach item="item" index="index" collection="parentIdCollection"
+                 open="(" separator="," close=")">
+            #{item,jdbcType=BIGINT}
+        </foreach>and deleted=0 group by parent_id
+    </select>
+    <select id="selectResourceCount" resultType="int">
+        select count(0)
+        from resource_tree
+        where tree_uid = #{treeUid,jdbcType=VARCHAR}
+        <if test="groupPath != null and groupPath != ''">
+            and group_path like concat(#{groupPath,jdbcType=VARCHAR},'/', '%')
+        </if>
+        <if test="groupUids != null and groupUids.size() != 0">
+            and group_uid in
+            <foreach collection="groupUids" item="item" separator="," open="(" close=")">
+                #{item,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+        and type = 2
+        and deleted = 0
+    </select>
+    <select id="selectResourceDiffNameCount" resultType="int">
+        select count(0)
+        from (select distinct concat(group_name, '-', parent_id)
+        from resource_tree
+        where tree_uid = #{treeUid,jdbcType=VARCHAR}
+        <if test="groupPath != null and groupPath != ''">
+            and group_path like concat(#{groupPath,jdbcType=VARCHAR},'/', '%')
+        </if>
+        <if test="groupUids != null and groupUids.size() != 0">
+            and group_uid in
+            <foreach collection="groupUids" item="item" separator="," open="(" close=")">
+                #{item,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+        and type = 2
+        and deleted = 0) as a
+    </select>
+
+    <select id="getGroupMonitorNum" resultType="int">
+        select count(distinct monitor_uid) as value
+        from resource_tree
+        where type = 2
+        and deleted = 0
+        and tree_uid = #{catelogUid,jdbcType=VARCHAR}
+        and (
+        <foreach collection="groupPaths" item="item" separator="or">
+            group_path like concat(#{item,jdbcType=VARCHAR}, '%')
+        </foreach>
+        )
+        <if test="excludeMonitorUids != null and excludeMonitorUids.size() != 0">
+            and resource_tree.monitor_uid not in
+            <foreach collection="excludeMonitorUids" item="item" separator="," open="(" close=")">
+                #{item,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+    </select>
+</mapper>

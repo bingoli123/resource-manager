@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.rms.dao.MonitorEventRelMapper">
+    <resultMap id="BaseResultMap" type="com.inspur.rms.rmspojo.PO.MonitorEventRel">
+        <!--@mbg.generated-->
+        <!--@Table monitor_event_rel-->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="monitor_uid" jdbcType="VARCHAR" property="monitorUid"/>
+        <result column="event" jdbcType="VARCHAR" property="event"/>
+        <result column="deleted" jdbcType="INTEGER" property="deleted"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="created_time" jdbcType="TIMESTAMP" property="createdTime"/>
+        <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime"/>
+        <result column="event_uid" jdbcType="VARCHAR" property="eventUid"/>
+        <result column="task_uid" jdbcType="VARCHAR" property="taskUid"/>
+        <result column="detail" jdbcType="VARCHAR" property="detail"/>
+        <result column="ablity_work_status" jdbcType="VARCHAR" property="ablityWorkStatus"/>
+        <result column="message" jdbcType="VARCHAR" property="message"/>
+    </resultMap>
+
+    <resultMap id="groupByMonitorUid" type="com.inspur.rms.rmspojo.VO.MonitorEventRelGroupByUidVO">
+        <result column="monitor_uid" jdbcType="VARCHAR" property="monitorUid"/>
+        <collection property="events" ofType="com.inspur.rms.rmspojo.PO.MonitorEventRel">
+            <id column="id" jdbcType="BIGINT" property="id"/>
+            <result column="monitor_uid" jdbcType="VARCHAR" property="monitorUid"/>
+            <result column="event" jdbcType="VARCHAR" property="event"/>
+            <result column="event_uid" jdbcType="VARCHAR" property="eventUid"/>
+            <result column="task_uid" jdbcType="VARCHAR" property="taskUid"/>
+            <result column="detail" jdbcType="VARCHAR" property="detail"/>
+            <result column="ablity_work_status" jdbcType="VARCHAR" property="ablityWorkStatus"/>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, monitor_uid, event, deleted, version, created_time,
+        updated_time,event_uid,task_uid,detail,ablity_work_status,message
+    </sql>
+    <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+        <!--@mbg.generated-->
+        insert into monitor_event_rel
+        (monitor_uid, event, deleted, version, created_time, updated_time,event_uid,task_uid,detail)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.monitorUid,jdbcType=VARCHAR}, #{item.event,jdbcType=VARCHAR}, #{item.deleted,jdbcType=INTEGER},
+            #{item.version,jdbcType=INTEGER}, #{item.createdTime,jdbcType=TIMESTAMP},
+            #{item.updatedTime,jdbcType=TIMESTAMP},#{item.eventUid,jdbcType=VARCHAR},#{item.taskUid,jdbcType=VARCHAR},
+            #{item.detail,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getMonitorEventByMonitorUid" resultMap="groupByMonitorUid">
+        select monitor_uid,id,event,event_uid,task_uid,detail,ablity_work_status from monitor_event_rel where deleted=0
+        and monitor_uid in
+        <foreach collection="monitorUids" item="item" separator="," open="(" close=")">
+            #{item,jdbcType=VARCHAR}
+        </foreach>
+        and event_uid=#{algoUid,jdbcType=VARCHAR}
+    </select>
+</mapper>

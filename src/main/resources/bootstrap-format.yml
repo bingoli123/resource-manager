@@ -1,0 +1,24 @@
+spring:
+  cloud:
+    consul:
+      host: 0.0.0.0
+      port: 8500
+      discovery:
+        enabled: true
+        deregister: true
+        register: true
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port} # 应用名称+服务器IP+端口
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        health-check-critical-timeout: 5m
+        ip-address: 0.0.0.0
+      config:
+        enabled: true
+        prefix: ivideo
+        default-context: resource-manager
+        data-key: config
+        format: yaml
+#  profiles:
+#    active: test

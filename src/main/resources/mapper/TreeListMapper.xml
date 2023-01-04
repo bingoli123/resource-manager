@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.rms.dao.TreeListMapper">
+    <resultMap id="BaseResultMap" type="com.inspur.rms.rmspojo.PO.TreeList">
+        <!--@mbg.generated-->
+        <!--@Table tree_list-->
+        <id column="tree_id" jdbcType="BIGINT" property="treeId"/>
+        <result column="tree_name" jdbcType="VARCHAR" property="treeName"/>
+        <result column="tree_type" jdbcType="VARCHAR" property="treeType"/>
+        <result column="tree_desc" jdbcType="VARCHAR" property="treeDesc"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="created_time" jdbcType="TIMESTAMP" property="createdTime"/>
+        <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime"/>
+        <result column="deleted" jdbcType="INTEGER" property="deleted"/>
+        <result column="tree_status" jdbcType="TINYINT" property="treeStatus"/>
+        <result column="tree_uid" jdbcType="VARCHAR" property="treeUid"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        tree_id, tree_name, tree_type, tree_desc, version, created_time, updated_time, deleted,
+        tree_status, tree_uid
+    </sql>
+    <select id="findByAll" resultMap="BaseResultMap">
+        <!--@mbg.generated-->
+        select
+        <include refid="Base_Column_List"/>
+        from tree_list
+        <where>
+            and deleted=0
+            <if test="treeId != null">
+                and tree_id=#{treeId,jdbcType=BIGINT}
+            </if>
+            <if test="treeName != null and treeName != ''">
+                and tree_name=#{treeName,jdbcType=VARCHAR}
+            </if>
+            <if test="treeType != null and treeType != ''">
+                and tree_type=#{treeType,jdbcType=VARCHAR}
+            </if>
+            <if test="treeDesc != null and treeDesc != ''">
+                and tree_desc=#{treeDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="version != null">
+                and version=#{version,jdbcType=INTEGER}
+            </if>
+            <if test="createdTime != null">
+                and created_time=#{createdTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedTime != null">
+                and updated_time=#{updatedTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="deleted != null">
+                and deleted=#{deleted,jdbcType=INTEGER}
+            </if>
+            <if test="treeUid != null and treeUid != ''">
+                and tree_uid=#{treeUid,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by tree_type asc,created_time desc
+    </select>
+    <insert id="batchInsert" keyColumn="tree_id" keyProperty="treeId" parameterType="map" useGeneratedKeys="true">
+        <!--@mbg.generated-->
+        insert into tree_list
+        (tree_name, tree_type, tree_desc, version, created_time, updated_time, deleted, tree_status,
+        tree_uid)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.treeName,jdbcType=VARCHAR}, #{item.treeType,jdbcType=VARCHAR}, #{item.treeDesc,jdbcType=VARCHAR},
+            #{item.version,jdbcType=INTEGER}, #{item.createdTime,jdbcType=TIMESTAMP},
+            #{item.updatedTime,jdbcType=TIMESTAMP},
+            #{item.deleted,jdbcType=INTEGER}, #{item.treeStatus,jdbcType=TINYINT}, #{item.treeUid,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+</mapper>

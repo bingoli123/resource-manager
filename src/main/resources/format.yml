@@ -1,0 +1,142 @@
+server:
+  port: 30160
+spring:
+  application:
+    name: resource-manager
+  profiles:
+    active: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://<>:<>/icp_ivideo_connection_manager?serverTimezone=GMT%2B8&characterEncoding=utf8&useUnicode=true&useSSL=false&&allowMultiQueries=true
+    username: <>
+    password: <>
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      auto-commit: true
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-test-query: SELECT 1
+      pool-name: RMSHikariCP
+  redis:
+    database: 1
+    host: <>
+    port: 6379
+    timeout: 3000
+    password: <>
+  rabbitmq:
+    addresses: <>:<>
+    username: <>
+    password: <>
+    connection-timeout: 15000
+    virtual-host: /
+    #    publisher-confirms ???????????publisher-confirm-type: correlated ?????????broker???
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        acknowledge-mode: manual
+        #        ??????
+        concurrency: 15
+        max-concurrency: 30
+        #        ????? ??????????????????
+        prefetch: 20
+        auto-startup: true
+  #----------------------------------------------------------------------------
+  cloud:
+    consul:
+      host: <>
+      port: 8500
+      discovery:
+        enabled: true
+        deregister: true
+        register: true
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port} # 应用名称+服务器IP+端口
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        health-check-interval: 30s
+        health-check-critical-timeout: 2m
+        ip-address: <>
+#----------------------------------------------------------------------------
+#  actuator监控点
+management:
+  #  endpoint:
+  #    health:
+  #      show-details: always
+  endpoint:
+    health:
+      show-details: always
+    shutdown:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath*:/mapper/**/*.xml,classpath*:/com/inspur/rabbit/producer/mapping/**/*.xml
+  type-aliases-package: com.inspur.rms.rmspojo.PO
+mybatis:
+  mapper-locations: classpath*:/mapper/**/*.xml,classpath*:/com/inspur/ivideo/rabbit/producer/mapping/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+pagehelper:
+  helper-dialect: mysql
+  reasonable: false
+  support-methods-arguments: true
+
+forest:
+  bean-id: config0 # 在spring上下文中bean的id, 默认值为forestConfiguration
+  backend: okhttp3 # 后端HTTP API： okhttp3
+  max-connections: 1000 # 连接池最大连接数，默认值为500
+  max-route-connections: 500 # 每个路由的最大连接数，默认值为500
+  timeout: 1800000 # 请求超时时间，单位为毫秒, 默认值为3000
+  connect-timeout: 300000 # 连接超时时间，单位为毫秒, 默认值为2000
+  retry-count: 0 # 请求失败后重试次数，默认为0次不重试
+  #ssl-protocol: SSLv3 # 单向验证的HTTPS的默认SSL协议，默认为SSLv3
+  logEnabled: true # 打开或关闭日志，默认为true
+  log-request: true # 打开/关闭Forest请求日志（默认为 true）
+  log-response-status: true # 打开/关闭Forest响应状态日志（默认为 true）
+  log-response-content: true # 打开/关闭Forest响应内容日志（默认为 false）
+  variables:
+    inner_api: http://<>:<>
+    kong: http://<>:<>
+    service_name: ${spring.application.name}
+  converters:
+    json:
+      type: com.dtflys.forest.converter.json.ForestJacksonConverter
+
+
+log:
+  enable: true
+  level: DEBUG
+  mode: file
+  files_path: /var/log/components/resource-manager
+  rotation_count: 3
+  rotation_size: 100
+  rotation_period: daily
+  compression: true
+  lifecycle: 30
+  roll_file: true
+#当choose=system并且elasticsearch是注释状态才会执行spring提供的@schedul的定时任务，此定时任务不支持集群使用
+#当job.choose!=system并且elasticjov是非注释状态才会会使用elasticsearch的定时任务
+#当job.choose!=system并且elasticsearch是注释状态 不会执行定时任务
+#千万不要同时choose=system并且elasticjov是非注释状态 这样会同时执行两个定时任务
+job:
+  choose: elasticjob
+#elastic:
+#  job:
+#    zk:
+#      serverLists: 127.0.0.1:2181
+#      namespace: elastic-job

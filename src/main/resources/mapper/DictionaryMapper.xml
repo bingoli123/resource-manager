@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.rms.dao.DictionaryMapper">
+    <resultMap id="BaseResultMap" type="com.inspur.rms.rmspojo.PO.Dictionary">
+        <!--@mbg.generated-->
+        <!--@Table `dictionary`-->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="group_value" jdbcType="VARCHAR" property="groupValue"/>
+        <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
+        <result column="connection_group" jdbcType="VARCHAR" property="connectionGroup"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="scope" jdbcType="INTEGER" property="scope"/>
+        <result column="struct" jdbcType="INTEGER" property="struct"/>
+        <result column="owner" jdbcType="VARCHAR" property="owner"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, group_value, group_name, connection_group, version, `scope`, struct, `owner`
+    </sql>
+    <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+        <!--@mbg.generated-->
+        insert into `dictionary`
+        (group_value, group_name, connection_group, version, `scope`, struct, `owner`)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.groupValue,jdbcType=VARCHAR}, #{item.groupName,jdbcType=VARCHAR},
+            #{item.connectionGroup,jdbcType=VARCHAR},
+            #{item.version,jdbcType=INTEGER}, #{item.scope,jdbcType=INTEGER}, #{item.struct,jdbcType=INTEGER},
+            #{item.owner,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+</mapper>

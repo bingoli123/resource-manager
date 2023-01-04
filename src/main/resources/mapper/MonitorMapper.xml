@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inspur.rms.dao.MonitorMapper">
+    <resultMap id="BaseResultMap" type="com.inspur.rms.rmspojo.PO.Monitor">
+        <!--@mbg.generated-->
+        <!--@Table monitor-->
+        <id column="monitor_id" jdbcType="BIGINT" property="monitorId"/>
+        <result column="monitor_name" jdbcType="VARCHAR" property="monitorName"/>
+        <result column="monitor_uid" jdbcType="VARCHAR" property="monitorUid"/>
+        <result column="latitude" jdbcType="DECIMAL" property="latitude"/>
+        <result column="longitude" jdbcType="DECIMAL" property="longitude"/>
+        <result column="altitude" jdbcType="DECIMAL" property="altitude"/>
+        <result column="enabled_capabilities" jdbcType="VARCHAR" property="enabledCapabilities"/>
+        <result column="native_capabilities" jdbcType="VARCHAR" property="nativeCapabilities"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="created_time" jdbcType="TIMESTAMP" property="createdTime"/>
+        <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime"/>
+        <result column="deleted" jdbcType="INTEGER" property="deleted"/>
+        <result column="business_uid" jdbcType="VARCHAR" property="businessUid"/>
+        <result column="Description" jdbcType="VARCHAR" property="description"/>
+        <result column="resource_type" jdbcType="VARCHAR" property="resourceType"/>
+        <result column="online" jdbcType="VARCHAR" property="online"/>
+        <result column="work_state" jdbcType="VARCHAR" property="workState"/>
+        <result column="recording" jdbcType="VARCHAR" property="recording"/>
+        <result column="event_cause" jdbcType="VARCHAR" property="eventCause"/>
+        <result column="monitor_name_update" jdbcType="BIT" property="monitorNameUpdate"/>
+        <result column="latitude_update" jdbcType="BIT" property="latitudeUpdate"/>
+        <result column="longitude_update" jdbcType="BIT" property="longitudeUpdate"/>
+        <result column="altitude_update" jdbcType="BIT" property="altitudeUpdate"/>
+        <result column="place_code_update" jdbcType="BIT" property="placeCodeUpdate"/>
+        <result column="full_address_update" jdbcType="BIT" property="fullAddressUpdate"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        monitor_id, monitor_name, monitor_uid, latitude, longitude, altitude, enabled_capabilities,
+        native_capabilities, version, created_time, updated_time, deleted, business_uid,Description,
+        resource_type, `online`, work_state, recording,event_cause, monitor_name_update, latitude_update,
+        longitude_update, altitude_update,
+        place_code_update, full_address_update
+    </sql>
+    <select id="findByAll" resultMap="BaseResultMap">
+        <!--@mbg.generated-->
+        select
+        <include refid="Base_Column_List"/>
+        from monitor
+        <where>
+            <if test="monitorId != null">
+                and monitor_id=#{monitorId,jdbcType=BIGINT}
+            </if>
+            <if test="monitorName != null and monitorName != ''">
+                and monitor_name=#{monitorName,jdbcType=VARCHAR}
+            </if>
+            <if test="monitorUid != null and monitorUid != ''">
+                and monitor_uid=#{monitorUid,jdbcType=VARCHAR}
+            </if>
+            <if test="latitude != null">
+                and latitude=#{latitude,jdbcType=DECIMAL}
+            </if>
+            <if test="longitude != null">
+                and longitude=#{longitude,jdbcType=DECIMAL}
+            </if>
+            <if test="altitude != null">
+                and altitude=#{altitude,jdbcType=DECIMAL}
+            </if>
+            <if test="enabledCapabilities != null and enabledCapabilities != ''">
+                and enabled_capabilities=#{enabledCapabilities,jdbcType=VARCHAR}
+            </if>
+            <if test="nativeCapabilities != null and nativeCapabilities != ''">
+                and native_capabilities=#{nativeCapabilities,jdbcType=VARCHAR}
+            </if>
+            <if test="version != null">
+                and version=#{version,jdbcType=INTEGER}
+            </if>
+            <if test="createdTime != null">
+                and created_time=#{createdTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="updatedTime != null">
+                and updated_time=#{updatedTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="deleted != null">
+                and deleted=#{deleted,jdbcType=INTEGER}
+            </if>
+            <if test="businessUid != null and businessUid != ''">
+                and business_uid=#{businessUid,jdbcType=VARCHAR}
+            </if>
+            <if test="resourceType != null and resourceType != ''">
+                and resource_type=#{resourceType,jdbcType=VARCHAR}
+            </if>
+            <if test="online != null and online != ''">
+                and `online`=#{online,jdbcType=VARCHAR}
+            </if>
+            <if test="workState != null and workState != ''">
+                and work_state=#{workState,jdbcType=VARCHAR}
+            </if>
+            <if test="recording != null and recording != ''">
+                and recording=#{recording,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+    <insert id="batchInsert" keyColumn="monitor_id" keyProperty="monitorId" parameterType="map" useGeneratedKeys="true">
+        <!--@mbg.generated-->
+        insert into monitor
+        (monitor_name, monitor_uid, latitude, longitude, altitude, enabled_capabilities, native_capabilities,
+        version, created_time, updated_time, deleted, business_uid, resource_type, `online`,
+        work_state, recording,Description,event_cause)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.monitorName,jdbcType=VARCHAR}, #{item.monitorUid,jdbcType=VARCHAR},
+            #{item.latitude,jdbcType=DECIMAL},
+            #{item.longitude,jdbcType=DECIMAL}, #{item.altitude,jdbcType=DECIMAL},
+            #{item.enabledCapabilities,jdbcType=VARCHAR},
+            #{item.nativeCapabilities,jdbcType=VARCHAR}, #{item.version,jdbcType=INTEGER},
+            #{item.createdTime,jdbcType=TIMESTAMP}, #{item.updatedTime,jdbcType=TIMESTAMP},
+            #{item.deleted,jdbcType=INTEGER}, #{item.businessUid,jdbcType=VARCHAR},
+            #{item.resourceType,jdbcType=VARCHAR},
+            #{item.online,jdbcType=VARCHAR}, #{item.workState,jdbcType=VARCHAR}, #{item.recording,jdbcType=VARCHAR},
+            #{item.description,jdbcType=VARCHAR},#{item.eventCause,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <select id="queryDevice" resultType="com.inspur.rms.rmspojo.cmspojo.Device">
+        select *
+        from device
+        where deleted = 0
+        and sub_resource_num > device.in_manage_num and sub_resource_num>0 and protocol=#{protocol,jdbcType=VARCHAR}
+    </select>
+
+    <select id="queryMedia" resultType="com.inspur.rms.rmspojo.cmspojo.Media">
+        select *
+        from media
+        where deleted = 0
+          and in_managed = 0
+    </select>
+</mapper>
